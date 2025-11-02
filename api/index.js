@@ -1,17 +1,17 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
-const serverless = require("serverless-http"); // 👈 agregado
+const serverless = require("serverless-http");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public"))); // Sirve archivos estáticos
 
 /** --------------------------------------------------------
  * FUNCIONES AUXILIARES
  * -------------------------------------------------------- */
-
 async function getFinalUrl(url) {
   try {
     const head = await axios.head(url, {
@@ -78,7 +78,6 @@ function extractVideoId(finalUrl, html) {
 /** --------------------------------------------------------
  * ENDPOINTS
  * -------------------------------------------------------- */
-
 app.post("/api/resolve", async (req, res) => {
   try {
     const { url } = req.body;
@@ -102,7 +101,6 @@ app.post("/api/resolve", async (req, res) => {
   }
 });
 
-// 🔹 Endpoint: obtener solo la URL directa
 app.post("/api/download", async (req, res) => {
   try {
     const { videoId, url } = req.body;
@@ -141,41 +139,11 @@ app.post("/api/download", async (req, res) => {
   }
 });
 
+// 🔹 Página principal
 app.get("/", (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Remover TikTok API</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 80px;
-            background-color: #f9f9f9;
-          }
-          h1 { color: #222; }
-          p { color: #555; font-size: 16px; }
-          code { background: #eee; padding: 4px 8px; border-radius: 6px; }
-        </style>
-      </head>
-      <body>
-        <h1>🚀 Remover TikTok API</h1>
-        <p>Servidor funcionando correctamente en Vercel ✅</p>
-        <h3>Endpoints:</h3>
-        <ul>
-          <li><code>POST /api/resolve</code></li>
-          <li><code>POST /api/download</code></li>
-          <li><code>GET /api/direct-download</code></li>
-        </ul>
-      </body>
-    </html>
-  `);
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ❌ Elimina esto ↓
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
-
-// ✅ En su lugar exporta:
+// ✅ Exporta para Vercel
 module.exports = app;
 module.exports.handler = serverless(app);
