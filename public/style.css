@@ -1,1 +1,171 @@
+/* General Body */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f8f9fa; /* Light mode default background */
+  color: #212529; /* Light mode default text color */
+  transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
+/* Dark Mode Styles */
+body.dark-mode {
+  background-color: #212529; /* Dark mode background */
+  color: #e2e6ea; /* Dark mode text color */
+}
+
+/* Navbar */
+.custom-navbar {
+  background-color: #ffffff; /* Light mode navbar background */
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .custom-navbar {
+  background-color: #2c3135; /* Dark mode navbar background */
+  border-bottom-color: #3a4046;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  color: #dc3545 !important; /* TikTok red */
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand .logo {
+  height: 30px; /* Adjust logo size */
+  margin-right: 10px;
+}
+
+body.dark-mode .navbar-brand {
+  color: #ff4d6d !important; /* Lighter TikTok red for dark mode */
+}
+
+.navbar-brand:hover {
+  opacity: 0.8;
+}
+
+.form-check-label {
+  color: #6c757d;
+}
+
+body.dark-mode .form-check-label {
+  color: #adb5bd;
+}
+
+/* Main Content Section */
+.content-section {
+  flex-grow: 1;
+  padding-top: 50px; /* Adjust spacing from navbar */
+}
+
+h1 {
+  font-weight: 600;
+  color: #343a40; /* Light mode heading color */
+}
+
+body.dark-mode h1 {
+  color: #f8f9fa; /* Dark mode heading color */
+}
+
+.highlight {
+  color: #dc3545; /* TikTok red */
+}
+
+body.dark-mode .highlight {
+  color: #ff4d6d; /* Lighter TikTok red for dark mode */
+}
+
+.lead {
+  color: #6c757d;
+}
+
+body.dark-mode .lead {
+  color: #adb5bd;
+}
+
+/* Input and Button Group */
+.input-group .form-control {
+  border-radius: 0.5rem 0 0 0.5rem !important;
+  border-color: #ced4da;
+  padding: 0.75rem 1rem;
+}
+
+body.dark-mode .input-group .form-control {
+  background-color: #3a4046;
+  border-color: #495057;
+  color: #f8f9fa;
+}
+
+body.dark-mode .input-group .form-control::placeholder {
+  color: #ced4da;
+}
+
+.input-group .btn-primary {
+  background-color: #dc3545; /* TikTok red */
+  border-color: #dc3545;
+  border-radius: 0 0.5rem 0.5rem 0 !important;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+}
+
+.input-group .btn-primary:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+/* Result Section */
+#result {
+  background-color: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.07);
+}
+
+body.dark-mode #result {
+  background-color: #2c3135;
+  border-color: #3a4046;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#result p {
+  margin-bottom: 0.5rem;
+}
+
+/* Download Button in Result */
+.download-btn {
+  background-color: #28a745; /* Green for success/download */
+  border-color: #28a745;
+  font-weight: 600;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.download-btn:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+/* Footer */
+.footer {
+  background-color: #f8f9fa; /* Light mode footer background */
+  border-top: 1px solid #e0e0e0;
+  margin-top: 50px;
+}
+
+body.dark-mode .footer {
+  background-color: #2c3135; /* Dark mode footer background */
+  border-top-color: #3a4046;
+}
+
+.footer .text-muted {
+  color: #6c757d !important;
+}
+
+body.dark-mode .footer .text-muted {
+  color: #adb5bd !important;
+}
