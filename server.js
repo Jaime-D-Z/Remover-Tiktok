@@ -142,25 +142,54 @@ app.post("/api/download", async (req, res) => {
   }
 });
 
-// 🔹 Nuevo Endpoint: descarga directa del archivo
-app.get("/api/direct-download", async (req, res) => {
-  try {
-    const { url } = req.query;
-    if (!url) return res.status(400).send("Falta el parámetro 'url'");
-
-    const response = await axios.get(url, { responseType: "arraybuffer" });
-
-    res.setHeader("Content-Type", "video/mp4");
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=tiktok-video.mp4"
-    );
-    res.send(Buffer.from(response.data, "binary"));
-  } catch (err) {
-    console.error("direct download error:", err.message);
-    res.status(500).send("Error al descargar el video");
-  }
+//
+app.get("/", (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Remover TikTok API</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 80px;
+            background-color: #f9f9f9;
+          }
+          h1 {
+            color: #222;
+          }
+          p {
+            color: #555;
+            font-size: 16px;
+          }
+          ul {
+            list-style: none;
+            padding: 0;
+          }
+          li {
+            margin: 8px 0;
+          }
+          code {
+            background: #eee;
+            padding: 4px 8px;
+            border-radius: 6px;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>🚀 Remover TikTok API</h1>
+        <p>Servidor funcionando correctamente en Vercel ✅</p>
+        <h3>Endpoints disponibles:</h3>
+        <ul>
+          <li><code>POST /api/resolve</code></li>
+          <li><code>POST /api/download</code></li>
+          <li><code>GET /api/direct-download</code></li>
+        </ul>
+      </body>
+    </html>
+  `);
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
