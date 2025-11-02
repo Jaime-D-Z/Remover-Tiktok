@@ -1,11 +1,9 @@
 {
   "name": "remover",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "TikTok Downloader API",
   "scripts": {
-    "test": "jest",
-    "start": "node index.js"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
