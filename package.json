@@ -16,5 +16,8 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "serverless-http": "^3.0.0"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }
