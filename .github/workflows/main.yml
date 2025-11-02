@@ -1,1 +1,47 @@
+# 1. Nombre del Workflow
+name: CI/CD Pipeline
 
+# 2. Eventos (Cuándo se ejecuta el workflow)
+on:
+  # Se ejecuta cuando se hace un 'push' (subida) a la rama principal (main)
+  push:
+    branches: [ main ]
+  # Se ejecuta cuando se crea un 'Pull Request' (solicitud de extracción) a la rama principal
+  pull_request:
+    branches: [ main ]
+  # Permite ejecutar el workflow manualmente desde la interfaz de GitHub
+  workflow_dispatch:
+
+# 3. Trabajos (Jobs)
+jobs:
+  # Definición de un trabajo llamado 'build_and_test'
+  build_and_test:
+    # Máquina virtual que usará GitHub para ejecutar este trabajo
+    runs-on: ubuntu-latest
+    
+    # Pasos que se ejecutarán secuencialmente
+    steps:
+      # Paso 1: Checkout - Clona el código del repositorio
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      # Paso 2: Setup Node - Configura el entorno de Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          # Puedes cambiar la versión si lo necesitas
+          node-version: '20' 
+          
+      # Paso 3: Install Dependencies - Instala los paquetes de tu package.json
+      - name: Install Dependencies
+        # Ejecuta el comando 'npm ci' (instalación limpia)
+        run: npm ci
+
+      # Paso 4: Run Tests - Ejecuta las pruebas (si tienes)
+      - name: Run Tests
+        # Ejecuta el comando para las pruebas (ajusta si usas 'jest', 'mocha', etc.)
+        run: npm test
+
+      # Paso 5 (Opcional): Build Project - Si tu proyecto necesita ser compilado (ej. TypeScript)
+      # - name: Build Project
+      #   run: npm run build
