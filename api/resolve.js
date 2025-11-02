@@ -30,7 +30,6 @@ async function getFinalUrl(url) {
 // Función para extraer videoId de URL o HTML
 function extractVideoId(finalUrl, html) {
   const patternsUrl = [/\/video\/(\d+)/, /\/v\/(\d+)/, /\/t\/(\d+)/, /\/item\/(\d+)/, /\/(\d{8,})(?:\?|$)/];
-
   for (const r of patternsUrl) {
     const m = finalUrl.match(r);
     if (m && m[1]) return m[1];
@@ -47,7 +46,7 @@ function extractVideoId(finalUrl, html) {
   return null;
 }
 
-// Endpoint principal
+// Endpoint /api/resolve
 app.post("/", async (req, res) => {
   try {
     const { url } = req.body;
@@ -71,4 +70,5 @@ app.post("/", async (req, res) => {
   }
 });
 
+module.exports = app;
 module.exports.handler = serverless(app);
