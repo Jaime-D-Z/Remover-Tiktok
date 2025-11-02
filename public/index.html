@@ -13,16 +13,39 @@
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
     rel="stylesheet"
   />
+  <!-- Font Awesome 6.4.0 - Hash de integridad verificado -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-papmYp4gKXtVfQ+vYxR4ri+Kaa4bDFFwrRSP2lWqKhztCxyXd95Bz8e0K5i6+qC+xB3L6yL9p/ZZF1z7Et1w3g=="
+    xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBh0H/ZpiBw==" 
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
+  <style>
+    /* Estilos base para Dark Mode (asumiendo que style.css define el resto) */
+    .dark-mode {
+      background-color: #1a1a1a;
+      color: #f1f1f1;
+    }
+    .dark-mode .custom-navbar {
+      background-color: #333 !important;
+      border-bottom: 1px solid #444;
+    }
+    .dark-mode .form-control, .dark-mode .form-control:focus {
+      background-color: #2b2b2b;
+      color: #f1f1f1;
+      border-color: #444;
+    }
+    .dark-mode .shadow-sm {
+        box-shadow: 0 0.125rem 0.25rem rgba(255, 255, 255, 0.075) !important;
+    }
+    .dark-mode .footer {
+      border-top: 1px solid #444;
+    }
+  </style>
 </head>
-<body>
-  <header class="navbar navbar-expand-lg custom-navbar">
+<body class="bg-light">
+  <header class="navbar navbar-expand-lg bg-white custom-navbar shadow-sm">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">TikTok Downloader</a>
       <div class="form-check form-switch ms-auto me-3">
@@ -35,41 +58,44 @@
   <div class="container text-center mt-5 content-section">
     <h1 class="mb-4 display-5">
       Descarga Videos de TikTok <br />
-      <span class="highlight">Sin Marca de Agua</span> 🌀
+      <span class="text-danger">Sin Marca de Agua</span> 🌀
     </h1>
     <p class="lead mb-4">
       Pega el enlace del video de TikTok a continuación y obtén tu descarga gratis.
     </p>
 
-    <div class="input-group mb-4 w-75 mx-auto shadow-sm">
+    <div class="input-group mb-4 w-75 mx-auto shadow-lg rounded-pill overflow-hidden">
       <input
         id="tiktokUrl"
         type="text"
-        class="form-control form-control-lg"
+        class="form-control form-control-lg border-0 ps-4"
         placeholder="Ej: https://www.tiktok.com/@usuario/video/1234567890"
         aria-label="Enlace de TikTok"
       />
-      <button id="downloadBtn" class="btn btn-primary btn-lg">
-        Obtener Video
+      <button id="downloadBtn" class="btn btn-danger btn-lg px-4">
+        <i class="fas fa-magic me-2"></i> Obtener Video
       </button>
     </div>
 
-    <div id="result" class="mt-4 p-3 rounded shadow-sm"></div>
+    <div id="result" class="mt-4 p-4 bg-white rounded shadow-sm w-75 mx-auto">
+        <!-- Resultados aparecerán aquí -->
+    </div>
   </div>
 
-  <footer class="footer mt-auto py-3">
+  <footer class="footer mt-auto py-3 bg-light fixed-bottom">
     <div class="container text-center">
-      <span class="text-muted">&copy; 2025 TikTok Downloader. Todos los derechos reservados.</span>
+      <span class="text-muted small">&copy; 2025 TikTok Downloader. Todos los derechos reservados.</span>
     </div>
   </footer>
 
   <script>
     const btn = document.getElementById("downloadBtn");
     const result = document.getElementById("result");
+    const urlInput = document.getElementById("tiktokUrl");
     const darkModeToggle = document.getElementById("darkModeToggle");
     const body = document.body;
-
-    // Cargar preferencia de Dark Mode
+    
+    // --- LÓGICA DE DARK MODE ---
     if (localStorage.getItem("darkMode") === "enabled") {
       body.classList.add("dark-mode");
       darkModeToggle.checked = true;
@@ -85,61 +111,86 @@
       }
     });
 
+    // Función auxiliar para mostrar mensajes de error/info
+    function displayMessage(type, message, isError = false) {
+        const color = isError ? 'text-danger' : (type === 'info' ? 'text-info' : 'text-success');
+        const icon = isError ? '❌' : (type === 'info' ? '⏳' : '✅');
+        result.innerHTML = `<p class="${color} fw-bold">${icon} ${message}</p>`;
+        // Cambiar el color de fondo de la caja de resultados
+        result.classList.remove('bg-white', 'bg-dark');
+        result.classList.add(body.classList.contains('dark-mode') ? 'bg-dark' : 'bg-white');
+    }
+
+    // --- LÓGICA PRINCIPAL DE DESCARGA ---
     btn.addEventListener("click", async () => {
-      const url = document.getElementById("tiktokUrl").value.trim();
+      const url = urlInput.value.trim();
+      
       if (!url) {
-        result.innerHTML = '<p class="text-warning">⚠️ Por favor, ingresa un enlace de TikTok.</p>';
+        displayMessage('warning', 'Por favor, ingresa un enlace de TikTok.', true);
         return;
       }
-
-      result.innerHTML = '<p class="text-info">⏳ Resolviendo enlace...</p>';
+      
+      // Deshabilitar botón y mostrar carga
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Procesando...';
+      displayMessage('info', 'Resolviendo enlace...', false);
 
       try {
-        // ✅ Cambié fetch a rutas relativas para Vercel
+        // 1. LLamada a /api/resolve (que debería estar funcionando con vercel.json)
         const resolveResp = await fetch("/api/resolve", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url }),
         });
 
-        if (!resolveResp.ok) throw new Error(`HTTP ${resolveResp.status}`);
-        const resolveData = await resolveResp.json();
+        if (resolveResp.status === 404) {
+            // Este es el error recurrente. Si ocurre, es un fallo de despliegue.
+            throw new Error("HTTP 404: El endpoint /api/resolve no fue encontrado. Revisar el despliegue de Vercel y el vercel.json.");
+        }
 
-        if (!resolveData.videoId) {
-          result.innerHTML = `<p class="text-danger">❌ Error: ${resolveData.error || "No se pudo resolver el enlace."}</p>`;
-          return;
+        const resolveData = await resolveResp.json();
+        if (!resolveResp.ok) {
+             // Si la API devuelve un error interno (400, 500)
+             throw new Error(resolveData.error || `Error en el servicio de resolución: HTTP ${resolveResp.status}`);
         }
 
         const { videoId } = resolveData;
-        result.innerHTML = `<p class="text-info">🔍 Video ID detectado: ${videoId}</p><p class="text-info">⏳ Obteniendo enlace de descarga...</p>`;
+        displayMessage('info', `Video ID detectado: ${videoId}. Obteniendo enlace de descarga...`, false);
 
+        // 2. LLamada a /api/download
         const downloadResp = await fetch("/api/download", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoId }),
         });
 
-        if (!downloadResp.ok) throw new Error(`HTTP ${downloadResp.status}`);
         const downloadData = await downloadResp.json();
-
+        if (!downloadResp.ok) {
+             throw new Error(downloadData.error || `Error en el servicio de descarga: HTTP ${downloadResp.status}`);
+        }
+        
         if (downloadData.download_url) {
           result.innerHTML = `
-            <p class="text-success">✅ ¡Video listo para descargar!</p>
+            <p class="text-success fw-bold">✅ ¡Video listo para descargar!</p>
             <a 
               href="${downloadData.download_url}" 
-              class="btn btn-success btn-lg download-btn" 
+              class="btn btn-success btn-lg download-btn mt-3" 
               target="_blank" 
               rel="noopener noreferrer"
             >
-              <i class="fas fa-download me-2"></i> Descargar sin marca de agua
+              <i class="fas fa-download me-2"></i> Descargar video
             </a>
           `;
         } else {
-          result.innerHTML = `<p class="text-danger">❌ Error: ${downloadData.error || "No se pudo obtener el video."}</p>`;
+          displayMessage('danger', downloadData.error || "No se pudo obtener el video.", true);
         }
       } catch (error) {
         console.error("Error general:", error);
-        result.innerHTML = `<p class="text-danger">❌ Ocurrió un error inesperado: ${error.message}</p>`;
+        displayMessage('danger', `Ocurrió un error: ${error.message}.`, true);
+      } finally {
+        // Restaurar botón
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-magic me-2"></i> Obtener Video';
       }
     });
   </script>
