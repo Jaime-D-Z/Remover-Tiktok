@@ -6,14 +6,10 @@ const app = express();
 app.use(express.json());
 
 async function getFinalUrl(url) {
-  try {
-    const head = await axios.head(url, { maxRedirects: 10, timeout: 10000 });
-    const final = head.request?.res?.responseUrl || url;
-    const resp = await axios.get(final, { timeout: 10000 });
-    return { html: resp.data, finalUrl: final, status: resp.status };
-  } catch (err) {
-    throw new Error("Error al seguir redirecciones: " + err.message);
-  }
+  const head = await axios.head(url, { maxRedirects: 10, timeout: 10000 });
+  const final = head.request?.res?.responseUrl || url;
+  const resp = await axios.get(final, { timeout: 10000 });
+  return { html: resp.data, finalUrl: final };
 }
 
 function extractVideoId(finalUrl, html) {
@@ -25,6 +21,7 @@ function extractVideoId(finalUrl, html) {
   return null;
 }
 
+// Ruta principal (coincide con /api/resolve en Vercel)
 app.post("/", async (req, res) => {
   try {
     const { url } = req.body;
@@ -35,7 +32,7 @@ app.post("/", async (req, res) => {
 
     if (!videoId) return res.status(404).json({ error: "No se pudo obtener el videoId" });
 
-    res.json({ finalUrl, videoId, message: "OK" });
+    res.json({ finalUrl, videoId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
