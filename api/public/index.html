@@ -16,7 +16,6 @@
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-papmYp4gKXtVfQ+vYxR4ri+Kaa4bDFFwrRSP2lWqKhztCxyXd95Bz8e0K5i6+qC+xB3L6yL9p/ZZF1z7Et1w3g=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
@@ -69,7 +68,6 @@
     const darkModeToggle = document.getElementById("darkModeToggle");
     const body = document.body;
 
-    // Cargar preferencia de Dark Mode
     if (localStorage.getItem("darkMode") === "enabled") {
       body.classList.add("dark-mode");
       darkModeToggle.checked = true;
@@ -95,8 +93,8 @@
       result.innerHTML = '<p class="text-info">⏳ Resolviendo enlace...</p>';
 
       try {
-        // Resuelve el video
-        const resolveResp = await fetch("https://remover-tiktok-kc4i-l8qos8p9h-jaime-d-zs-projects.vercel.app/api/resolve", {
+        // 🚀 Uso de rutas relativas, sin CORS
+        const resolveResp = await fetch("/api/resolve", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url }),
@@ -113,8 +111,7 @@
         const { videoId } = resolveData;
         result.innerHTML = `<p class="text-info">🔍 Video ID detectado: ${videoId}</p><p class="text-info">⏳ Obteniendo enlace de descarga...</p>`;
 
-        // Obtiene URL de descarga
-        const downloadResp = await fetch("https://remover-tiktok-kc4i-l8qos8p9h-jaime-d-zs-projects.vercel.app/api/download", {
+        const downloadResp = await fetch("/api/download", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ videoId }),
