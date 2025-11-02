@@ -5,7 +5,7 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-// Endpoint principal
+// Endpoint /api/download
 app.post("/", async (req, res) => {
   try {
     const { videoId, url } = req.body;
@@ -23,10 +23,7 @@ app.post("/", async (req, res) => {
     const download_url = data?.data?.play || data?.data?.play_addr || data?.data?.wmplay;
 
     if (!download_url) {
-      return res.status(404).json({
-        error: "No se encontró la URL del video.",
-        raw: data,
-      });
+      return res.status(404).json({ error: "No se encontró la URL del video.", raw: data });
     }
 
     res.json({ download_url });
@@ -36,4 +33,5 @@ app.post("/", async (req, res) => {
   }
 });
 
+module.exports = app;
 module.exports.handler = serverless(app);
