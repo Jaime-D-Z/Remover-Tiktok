@@ -21,7 +21,6 @@ function extractVideoId(finalUrl, html) {
   return null;
 }
 
-// Ruta principal (coincide con /api/resolve en Vercel)
 app.post("/", async (req, res) => {
   try {
     const { url } = req.body;
@@ -30,7 +29,8 @@ app.post("/", async (req, res) => {
     const { html, finalUrl } = await getFinalUrl(url);
     const videoId = extractVideoId(finalUrl, html);
 
-    if (!videoId) return res.status(404).json({ error: "No se pudo obtener el videoId" });
+    if (!videoId)
+      return res.status(404).json({ error: "No se pudo obtener el videoId" });
 
     res.json({ finalUrl, videoId });
   } catch (err) {
@@ -38,5 +38,4 @@ app.post("/", async (req, res) => {
   }
 });
 
-module.exports = app;
 module.exports.handler = serverless(app);
