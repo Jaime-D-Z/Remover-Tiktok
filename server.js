@@ -1,6 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const serverless = require("serverless-http"); // 👈 agregado
 
 const app = express();
 app.use(cors());
@@ -112,9 +113,7 @@ app.post("/api/download", async (req, res) => {
       ? url
       : `https://www.tiktok.com/@user/video/${videoId}`;
 
-    const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(
-      videoUrl
-    )}`;
+    const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(videoUrl)}`;
     const r = await axios.get(api, {
       headers: {
         "User-Agent":
@@ -142,7 +141,6 @@ app.post("/api/download", async (req, res) => {
   }
 });
 
-//
 app.get("/", (req, res) => {
   res.send(`
     <html>
@@ -155,31 +153,15 @@ app.get("/", (req, res) => {
             margin-top: 80px;
             background-color: #f9f9f9;
           }
-          h1 {
-            color: #222;
-          }
-          p {
-            color: #555;
-            font-size: 16px;
-          }
-          ul {
-            list-style: none;
-            padding: 0;
-          }
-          li {
-            margin: 8px 0;
-          }
-          code {
-            background: #eee;
-            padding: 4px 8px;
-            border-radius: 6px;
-          }
+          h1 { color: #222; }
+          p { color: #555; font-size: 16px; }
+          code { background: #eee; padding: 4px 8px; border-radius: 6px; }
         </style>
       </head>
       <body>
         <h1>🚀 Remover TikTok API</h1>
         <p>Servidor funcionando correctamente en Vercel ✅</p>
-        <h3>Endpoints disponibles:</h3>
+        <h3>Endpoints:</h3>
         <ul>
           <li><code>POST /api/resolve</code></li>
           <li><code>POST /api/download</code></li>
@@ -190,8 +172,10 @@ app.get("/", (req, res) => {
   `);
 });
 
+// ❌ Elimina esto ↓
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`)
-);
+// ✅ En su lugar exporta:
+module.exports = app;
+module.exports.handler = serverless(app);
