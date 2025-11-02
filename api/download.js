@@ -13,6 +13,7 @@ app.post("/", async (req, res) => {
 
     const videoUrl = url ? url : `https://www.tiktok.com/@user/video/${videoId}`;
     const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(videoUrl)}`;
+
     const r = await axios.get(api, {
       headers: { "User-Agent": "Mozilla/5.0" },
     });
@@ -26,9 +27,9 @@ app.post("/", async (req, res) => {
 
     res.json({ download_url });
   } catch (err) {
+    console.error("download error:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-module.exports = app;
 module.exports.handler = serverless(app);
