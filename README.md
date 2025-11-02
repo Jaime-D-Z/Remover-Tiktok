@@ -2,7 +2,7 @@
 
 Descarga videos de TikTok sin marca de agua de forma rápida y sencilla. Aplicación web simple con interfaz moderna y modo oscuro.
 
-## ⚖️ Aviso Legal y Derechos de Autor
+## ⚖️ Aviso Legal y Derechos de Autor:
 
 **IMPORTANTE**: Esta herramienta está diseñada únicamente para fines educativos y de uso personal.
 
