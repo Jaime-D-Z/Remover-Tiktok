@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
   <head>
@@ -14,22 +13,22 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <!-- FontAwesome CDN público -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-papmYp4gKXtVfQ+vYxR4ri+Kaa4bDFFwrRSP2lWqKhztCxyXd95Bz8e0K5i6+qC+xB3L6yL9p/ZZF1z7Et1w3g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
   </head>
   <body>
     <header class="navbar navbar-expand-lg custom-navbar">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-          TikTok Downloader
-        </a>
+        <a class="navbar-brand" href="#">TikTok Downloader</a>
         <div class="form-check form-switch ms-auto me-3">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="darkModeToggle"
-          />
-          <label class="form-check-label" for="darkModeToggle"
-            >Modo Oscuro</label
-          >
+          <input class="form-check-input" type="checkbox" id="darkModeToggle" />
+          <label class="form-check-label" for="darkModeToggle">Modo Oscuro</label>
         </div>
       </div>
     </header>
@@ -40,8 +39,7 @@
         <span class="highlight">Sin Marca de Agua</span> 🌀
       </h1>
       <p class="lead mb-4">
-        Pega el enlace del video de TikTok a continuación y obtén tu descarga
-        gratis.
+        Pega el enlace del video de TikTok a continuación y obtén tu descarga gratis.
       </p>
 
       <div class="input-group mb-4 w-75 mx-auto shadow-sm">
@@ -57,15 +55,12 @@
         </button>
       </div>
 
-      <div id="result" class="mt-4 p-3 rounded shadow-sm">
-        </div>
+      <div id="result" class="mt-4 p-3 rounded shadow-sm"></div>
     </div>
 
     <footer class="footer mt-auto py-3">
       <div class="container text-center">
-        <span class="text-muted"
-          >&copy; 2025 TikTok Downloader. Todos los derechos reservados.</span
-        >
+        <span class="text-muted">&copy; 2025 TikTok Downloader. Todos los derechos reservados.</span>
       </div>
     </footer>
 
@@ -75,13 +70,12 @@
       const darkModeToggle = document.getElementById("darkModeToggle");
       const body = document.body;
 
-      // Cargar preferencia de Dark Mode al inicio
+      // Cargar preferencia de Dark Mode
       if (localStorage.getItem("darkMode") === "enabled") {
         body.classList.add("dark-mode");
         darkModeToggle.checked = true;
       }
 
-      // Toggle Dark Mode
       darkModeToggle.addEventListener("change", () => {
         if (darkModeToggle.checked) {
           body.classList.add("dark-mode");
@@ -95,14 +89,14 @@
       btn.addEventListener("click", async () => {
         const url = document.getElementById("tiktokUrl").value.trim();
         if (!url) {
-          result.innerHTML =
-            '<p class="text-warning">⚠️ Por favor, ingresa un enlace de TikTok.</p>';
+          result.innerHTML = '<p class="text-warning">⚠️ Por favor, ingresa un enlace de TikTok.</p>';
           return;
         }
 
         result.innerHTML = '<p class="text-info">⏳ Resolviendo enlace...</p>';
 
         try {
+          // Resuelve el video
           const resolveResp = await fetch("/api/resolve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -111,15 +105,14 @@
 
           const resolveData = await resolveResp.json();
           if (!resolveData.videoId) {
-            result.innerHTML = `<p class="text-danger">❌ Error: ${
-              resolveData.error || "No se pudo resolver el enlace."
-            }</p>`;
+            result.innerHTML = `<p class="text-danger">❌ Error: ${resolveData.error || "No se pudo resolver el enlace."}</p>`;
             return;
           }
 
           const { videoId } = resolveData;
           result.innerHTML = `<p class="text-info">🔍 Video ID detectado: ${videoId}</p><p class="text-info">⏳ Obteniendo enlace de descarga...</p>`;
 
+          // Obtiene URL de descarga
           const downloadResp = await fetch("/api/download", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -127,26 +120,22 @@
           });
 
           const downloadData = await downloadResp.json();
-          if (downloadData.download_url) {
-            // Usando tu endpoint de descarga directa (Solución 2)
-            const directDownloadLink = `/api/direct-download?url=${encodeURIComponent(
-              downloadData.download_url
-            )}`;
 
+          if (downloadData.download_url) {
+            // Enlace directo
             result.innerHTML = `
               <p class="text-success">✅ ¡Video listo para descargar!</p>
               <a 
-                href="${directDownloadLink}" 
+                href="${downloadData.download_url}" 
                 class="btn btn-success btn-lg download-btn" 
+                target="_blank" 
                 rel="noopener noreferrer"
               >
                 <i class="fas fa-download me-2"></i> Descargar sin marca de agua
               </a>
-              `;
+            `;
           } else {
-            result.innerHTML = `<p class="text-danger">❌ Error: ${
-              downloadData.error || "No se pudo obtener el video."
-            }</p>`;
+            result.innerHTML = `<p class="text-danger">❌ Error: ${downloadData.error || "No se pudo obtener el video."}</p>`;
           }
         } catch (error) {
           console.error("Error general:", error);
@@ -154,9 +143,5 @@
         }
       });
     </script>
-    <script
-      src="https://kit.fontawesome.com/a076d05399.js"
-      crossorigin="anonymous"
-    ></script>
   </body>
 </html>
