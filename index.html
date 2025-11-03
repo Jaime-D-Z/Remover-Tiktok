@@ -1,81 +1,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TikTok Downloader sin Marca de Agua - Descarga Fácil</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="style.css" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-    rel="stylesheet"
-  />
-    <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBh0H/ZpiBw==" 
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TikTok Downloader sin Marca de Agua - Descarga Fácil</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 </head>
-<body class="bg-light">
-  <header class="navbar navbar-expand-lg bg-white custom-navbar shadow-sm">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">TikTok Downloader</a>
-      <div class="form-check form-switch ms-auto me-3">
-        <input class="form-check-input" type="checkbox" id="darkModeToggle" />
-        <label class="form-check-label" for="darkModeToggle">Modo Oscuro</label>
-      </div>
-    </div>
-  </header>
+<body>
+  <header class="navbar navbar-expand-lg custom-navbar shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fab fa-tiktok me-2"></i>TikTok Downloader
+      </a>
+      <div class="form-check form-switch ms-auto me-3">
+        <input class="form-check-input" type="checkbox" id="darkModeToggle" />
+        <label class="form-check-label" for="darkModeToggle">Modo Oscuro</label>
+      </div>
+    </div>
+  </header>
 
-  <div class="container text-center mt-5 content-section">
-    <h1 class="mb-4 display-5">
-      Descarga Videos de TikTok <br />
-      <span class="text-danger">Sin Marca de Agua</span> 🌀
-    </h1>
-    <p class="lead mb-4">
-      Pega el enlace del video de TikTok a continuación y obtén tu descarga gratis.
-    </p>
+  <div class="container text-center mt-5 content-section">
+    <h1 class="mb-4 display-5">
+      Descarga Videos de TikTok <br />
+      <span class="highlight">Sin Marca de Agua</span> 🌀
+    </h1>
+    <p class="lead mb-4">
+      Pega el enlace del video de TikTok a continuación y obtén tu descarga gratis.
+    </p>
 
-    <div class="input-group mb-4 w-75 mx-auto shadow-lg rounded-pill overflow-hidden">
-      <input
-        id="tiktokUrl"
-        type="text"
-        class="form-control form-control-lg border-0 ps-4"
-        placeholder="Ej: https://www.tiktok.com/@usuario/video/1234567890"
-        aria-label="Enlace de TikTok"
-      />
-      <button id="downloadBtn" class="btn btn-danger btn-lg px-4">
-        <i class="fas fa-magic me-2"></i> Obtener Video
-      </button>
-    </div>
+    <div class="input-group mb-4 w-75 mx-auto shadow-lg">
+      <input
+        id="tiktokUrl"
+        type="text"
+        class="form-control form-control-lg"
+        placeholder="Ej: https://www.tiktok.com/@usuario/video/1234567890"
+        aria-label="Enlace de TikTok"
+      />
+      <button id="downloadBtn" class="btn btn-primary">
+        <i class="fas fa-magic me-2"></i> Obtener Video
+      </button>
+    </div>
 
-    <div id="result" class="mt-4 p-4 bg-white rounded shadow-sm w-75 mx-auto">
-            </div>
-  </div>
+    <div id="result" class="mt-4 p-4 rounded shadow-sm w-75 mx-auto"></div>
+  </div>
 
-  <footer class="footer mt-auto py-3 bg-light fixed-bottom">
-    <div class="container text-center">
-      <span class="text-muted small">&copy; 2025 TikTok Downloader. Todos los derechos reservados.</span>
-    </div>
-  </footer>
+  <footer class="footer mt-auto py-3">
+    <div class="container text-center">
+      <span class="text-muted small">&copy; 2025 TikTok Downloader. Todos los derechos reservados.</span>
+    </div>
+  </footer>
 
-  <script>
-   const btn = document.getElementById("downloadBtn");
+  <script>
+   const btn = document.getElementById("downloadBtn");
 const result = document.getElementById("result");
 const urlInput = document.getElementById("tiktokUrl");
 const darkModeToggle = document.getElementById("darkModeToggle");
 const body = document.body;
 
 // --- LÓGICA DE DARK MODE (Sin localStorage) ---
-// Usamos una variable en memoria para mantener el estado durante la sesión
 let darkModeEnabled = false;
 
-// Aplicar dark mode si está habilitado
 if (darkModeEnabled) {
   body.classList.add("dark-mode");
   darkModeToggle.checked = true;
@@ -96,12 +94,11 @@ function displayMessage(type, message, isError = false) {
     const color = isError ? 'text-danger' : (type === 'info' ? 'text-info' : 'text-success');
     const icon = isError ? '❌' : (type === 'info' ? '⏳' : '✅');
     result.innerHTML = `<p class="${color} fw-bold">${icon} ${message}</p>`;
-    // Cambiar el color de fondo de la caja de resultados
     result.classList.remove('bg-white', 'bg-dark');
     result.classList.add(body.classList.contains('dark-mode') ? 'bg-dark' : 'bg-white');
 }
 
-// --- LÓGICA PRINCIPAL DE DESCARGA (Ahora usa Proxy) ---
+// --- LÓGICA PRINCIPAL DE DESCARGA ---
 btn.addEventListener("click", async () => {
   const url = urlInput.value.trim();
   
@@ -110,13 +107,11 @@ btn.addEventListener("click", async () => {
     return;
   }
   
-  // Deshabilitar botón y mostrar carga
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Procesando...';
   displayMessage('info', 'Resolviendo enlace...', false);
 
   try {
-    // 1. LLamada a resolve (POST)
     const resolveResp = await fetch("/.netlify/functions/resolve", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,7 +130,6 @@ btn.addEventListener("click", async () => {
     const { videoId } = resolveData;
     displayMessage('info', `Video ID detectado: ${videoId}. Preparando descarga...`, false);
 
-    // 2. CREAR URL DE DESCARGA CON PROXY
     const downloadProxyUrl = `/.netlify/functions/download?videoId=${videoId}`;
 
     if (videoId) {
@@ -157,11 +151,10 @@ btn.addEventListener("click", async () => {
     console.error("Error general:", error);
     displayMessage('danger', `Ocurrió un error: ${error.message}.`, true);
   } finally {
-    // Restaurar botón
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-magic me-2"></i> Obtener Video';
   }
 });
-  </script>
+  </script>
 </body>
 </html>
