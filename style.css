@@ -397,3 +397,17 @@ body.dark-mode #result {
         text-align: center;
       }
     }
+
+
+body.dark-mode .text-muted {
+  color: #adb5bd !important;
+}
+
+.footer p a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+body.dark-mode .footer p a {
+  color: var(--secondary-color);
+}    
