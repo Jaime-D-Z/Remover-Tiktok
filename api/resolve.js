@@ -6,11 +6,8 @@ const axios = require("axios");
  * @returns {Promise<{html: string, finalUrl: string}>} - Contenido HTML y URL resuelta.
  */
 async function getFinalUrl(url) {
-  // Usamos axios.get para manejar redirecciones y obtener el HTML
-  const resp = await axios.get(url, { maxRedirects: 10, timeout: 10000 }); // La URL final está en la propiedad request.res.responseUrl después de todas las redirecciones.
-
+  const resp = await axios.get(url, { maxRedirects: 10, timeout: 10000 });
   const final = resp.request?.res?.responseUrl || url;
-
   return { html: resp.data, finalUrl: final };
 }
 
@@ -21,7 +18,6 @@ async function getFinalUrl(url) {
  * @returns {string | null} - El ID del video si se encuentra.
  */
 function extractVideoId(finalUrl, html) {
-  // Patrones para encontrar el ID del video
   const patterns = [/\/video\/(\d+)/, /"aweme_id":"?(\d+)"?/];
   for (const r of patterns) {
     const m = finalUrl.match(r) || html.match(r);
@@ -32,10 +28,8 @@ function extractVideoId(finalUrl, html) {
 
 /**
  * Handler principal para la función de Netlify.
- * Netlify mapea api/resolve.js a la ruta /.netlify/functions/resolve
  */
 exports.handler = async (event) => {
-  // 1. Verificar que la solicitud sea POST
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
@@ -44,7 +38,6 @@ exports.handler = async (event) => {
   }
 
   try {
-    // El cuerpo de la solicitud se recibe como una cadena JSON en Netlify/Lambda.
     const { url } = JSON.parse(event.body);
 
     if (!url) {
@@ -64,7 +57,7 @@ exports.handler = async (event) => {
         statusCode: 404,
         body: JSON.stringify({ error: "No se pudo obtener el videoId" }),
       };
-    } // Envía la respuesta en formato JSON
+    }
 
     return {
       statusCode: 200,

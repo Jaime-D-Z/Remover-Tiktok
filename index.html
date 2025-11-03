@@ -65,13 +65,13 @@
   </footer>
 
   <script>
-   const btn = document.getElementById("downloadBtn");
+const btn = document.getElementById("downloadBtn");
 const result = document.getElementById("result");
 const urlInput = document.getElementById("tiktokUrl");
 const darkModeToggle = document.getElementById("darkModeToggle");
 const body = document.body;
 
-// --- LÓGICA DE DARK MODE (Sin localStorage) ---
+// --- DARK MODE ---
 let darkModeEnabled = false;
 
 if (darkModeEnabled) {
@@ -89,16 +89,16 @@ darkModeToggle.addEventListener("change", () => {
   }
 });
 
-// Función auxiliar para mostrar mensajes de error/info
+// Función auxiliar para mostrar mensajes
 function displayMessage(type, message, isError = false) {
-    const color = isError ? 'text-danger' : (type === 'info' ? 'text-info' : 'text-success');
-    const icon = isError ? '❌' : (type === 'info' ? '⏳' : '✅');
-    result.innerHTML = `<p class="${color} fw-bold">${icon} ${message}</p>`;
-    result.classList.remove('bg-white', 'bg-dark');
-    result.classList.add(body.classList.contains('dark-mode') ? 'bg-dark' : 'bg-white');
+  const color = isError ? 'text-danger' : (type === 'info' ? 'text-info' : 'text-success');
+  const icon = isError ? '❌' : (type === 'info' ? '⏳' : '✅');
+  result.innerHTML = `<p class="${color} fw-bold">${icon} ${message}</p>`;
+  result.classList.remove('bg-white', 'bg-dark');
+  result.classList.add(body.classList.contains('dark-mode') ? 'bg-dark' : 'bg-white');
 }
 
-// --- LÓGICA PRINCIPAL DE DESCARGA ---
+// --- LÓGICA PRINCIPAL ---
 btn.addEventListener("click", async () => {
   const url = urlInput.value.trim();
   
@@ -108,7 +108,7 @@ btn.addEventListener("click", async () => {
   }
   
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Procesando...';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Procesando...';
   displayMessage('info', 'Resolviendo enlace...', false);
 
   try {
@@ -119,37 +119,41 @@ btn.addEventListener("click", async () => {
     });
 
     if (resolveResp.status === 404) {
-        throw new Error("HTTP 404: No se encontró la función 'resolve'. Revisa la configuración de la ruta de funciones en Netlify.");
+      throw new Error("HTTP 404: No se encontró la función 'resolve'.");
     }
 
     const resolveData = await resolveResp.json();
     if (!resolveResp.ok) {
-         throw new Error(resolveData.error || `Error en el servicio de resolución: HTTP ${resolveResp.status}`);
+      throw new Error(resolveData.error || `Error: HTTP ${resolveResp.status}`);
     }
 
     const { videoId } = resolveData;
-    displayMessage('info', `Video ID detectado: ${videoId}. Preparando descarga...`, false);
+    displayMessage('info', `Video detectado: ${videoId}. Preparando descarga...`, false);
 
     const downloadProxyUrl = `/.netlify/functions/download?videoId=${videoId}`;
 
     if (videoId) {
-     result.innerHTML = `
+      result.innerHTML = `
         <p class="text-success fw-bold">✅ ¡Video listo para descargar!</p>
         <a 
           href="${downloadProxyUrl}" 
           class="btn btn-success btn-lg download-btn mt-3" 
-           target="_self" 
+          target="_blank"
           rel="noopener noreferrer"
         >
-          <i class="fas fa-download me-2"></i> Descargar video
+          <i class="fas fa-download me-2"></i> Descargar Video
         </a>
+        <p class="text-muted small mt-3">
+          <i class="fas fa-info-circle me-1"></i> 
+          Videos pequeños se descargan directamente. Videos grandes se abrirán en nueva pestaña.
+        </p>
       `;
     } else {
       displayMessage('danger', "No se pudo obtener el video.", true);
     }
   } catch (error) {
-    console.error("Error general:", error);
-    displayMessage('danger', `Ocurrió un error: ${error.message}.`, true);
+    console.error("Error:", error);
+    displayMessage('danger', `Error: ${error.message}`, true);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-magic me-2"></i> Obtener Video';

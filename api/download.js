@@ -2,10 +2,10 @@ const axios = require("axios");
 
 /**
  * Handler principal para la función de Netlify.
- * Se usa como proxy para descargar el video y forzar la descarga en el navegador.
+ * Intenta descargar el video a través del proxy si es pequeño,
+ * o redirige directamente si es muy grande.
  */
 exports.handler = async (event) => {
-  // CAMBIO CLAVE: Esperamos una solicitud GET, ya que el navegador nos redirige aquí.
   if (event.httpMethod !== "GET") {
     return {
       statusCode: 405,
@@ -16,7 +16,6 @@ exports.handler = async (event) => {
   }
 
   try {
-    // En un GET, los parámetros vienen en queryStringParameters
     const { videoId, url: rawUrl } = event.queryStringParameters;
 
     if (!videoId && !rawUrl) {
@@ -47,37 +46,128 @@ exports.handler = async (event) => {
       };
     }
 
-    // PASO 2: Descargar el contenido del video desde el CDN
+    // PASO 2: Verificar el tamaño del video con HEAD request
+    const headResponse = await axios
+      .head(download_url, {
+        timeout: 5000,
+      })
+      .catch(() => null);
+
+    const contentLength = headResponse?.headers?.["content-length"];
+    const fileSizeMB = contentLength
+      ? parseInt(contentLength) / (1024 * 1024)
+      : 0;
+
+    console.log(`Tamaño del video: ${fileSizeMB.toFixed(2)} MB`);
+
+    // PASO 3: Decidir entre proxy o redirección
+    const MAX_SIZE_MB = 5; // Límite de 5 MB para usar el proxy
+
+    if (fileSizeMB > MAX_SIZE_MB || !contentLength) {
+      // Video grande o tamaño desconocido: REDIRIGIR directamente
+      console.log("Video muy grande, redirigiendo directamente...");
+      return {
+        statusCode: 302,
+        headers: {
+          Location: download_url,
+          "Cache-Control": "no-cache",
+        },
+        body: "",
+      };
+    }
+
+    // PASO 4: Video pequeño: descargar a través del proxy
+    console.log("Video pequeño, descargando a través del proxy...");
     const fileResponse = await axios.get(download_url, {
-      responseType: "arraybuffer", // Crucial para manejar datos binarios
-      timeout: 20000,
+      responseType: "arraybuffer",
+      timeout: 15000, // 15 segundos para videos pequeños
     });
 
     const videoBuffer = Buffer.from(fileResponse.data);
     const base64Video = videoBuffer.toString("base64");
     const filename = `tiktok_video_${videoId || Date.now()}.mp4`;
 
-    // PASO 3: Devolver el contenido binario con encabezados de descarga
     return {
       statusCode: 200,
       headers: {
-        // Indica al navegador que fuerce la descarga del archivo
         "Content-Disposition": `attachment; filename="${filename}"`,
         "Content-Type": "video/mp4",
         "Content-Length": videoBuffer.length,
       },
       body: base64Video,
-      isBase64Encoded: true, // Indica a Lambda/Netlify que el cuerpo está codificado
+      isBase64Encoded: true,
     };
   } catch (err) {
     console.error("Error en la función download:", err.message);
+
+    // Si falla el proxy, intentar redirigir como fallback
+    if (err.config?.url) {
+      console.log("Error en proxy, intentando redirección de emergencia...");
+      return {
+        statusCode: 302,
+        headers: {
+          Location: err.config.url,
+          "Cache-Control": "no-cache",
+        },
+        body: "",
+      };
+    }
+
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        error: "Error al descargar el video.",
-        details: err.message,
-      }),
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+      body: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Error de Descarga</title>
+          <style>
+            body {
+              font-family: 'Poppins', Arial, sans-serif;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .error-box {
+              background: white;
+              padding: 2.5rem;
+              border-radius: 12px;
+              box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+              text-align: center;
+              max-width: 500px;
+            }
+            h1 { color: #dc3545; margin-bottom: 1rem; }
+            p { color: #6c757d; line-height: 1.6; }
+            button {
+              margin-top: 1.5rem;
+              padding: 0.75rem 2rem;
+              background: #dc3545;
+              color: white;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 1rem;
+              font-weight: 600;
+              transition: background 0.2s;
+            }
+            button:hover { background: #c82333; }
+          </style>
+        </head>
+        <body>
+          <div class="error-box">
+            <h1>❌ Error al Descargar</h1>
+            <p><strong>Detalle del error:</strong></p>
+            <p>${err.message}</p>
+            <p>Por favor, intenta nuevamente. Si el problema persiste, el video podría ser demasiado grande o estar temporalmente no disponible.</p>
+            <button onclick="window.close()">Cerrar Pestaña</button>
+          </div>
+        </body>
+        </html>
+      `,
     };
   }
 };
