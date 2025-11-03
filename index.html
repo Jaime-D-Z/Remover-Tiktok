@@ -145,12 +145,13 @@
         }
         
         if (downloadData.download_url) {
-          result.innerHTML = `
+         result.innerHTML = `
             <p class="text-success fw-bold">✅ ¡Video listo para descargar!</p>
             <a 
               href="${downloadData.download_url}" 
               class="btn btn-success btn-lg download-btn mt-3" 
               target="_blank" 
+             download="tiktok_video.mp4" 
               rel="noopener noreferrer"
             >
               <i class="fas fa-download me-2"></i> Descargar video
