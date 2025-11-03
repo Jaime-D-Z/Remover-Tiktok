@@ -98,7 +98,7 @@
         result.classList.add(body.classList.contains('dark-mode') ? 'bg-dark' : 'bg-white');
     }
 
-    // --- LÓGICA PRINCIPAL DE DESCARGA (Rutas de Netlify Corregidas) ---
+    // --- LÓGICA PRINCIPAL DE DESCARGA (Ahora usa Proxy) ---
     btn.addEventListener("click", async () => {
       const url = urlInput.value.trim();
       
@@ -113,7 +113,7 @@
       displayMessage('info', 'Resolviendo enlace...', false);
 
       try {
-        // 1. LLamada a resolve usando la ruta estándar de Netlify: /.netlify/functions/
+        // 1. LLamada a resolve (POST)
         const resolveResp = await fetch("/.netlify/functions/resolve", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -130,35 +130,27 @@
         }
 
         const { videoId } = resolveData;
-        displayMessage('info', `Video ID detectado: ${videoId}. Obteniendo enlace de descarga...`, false);
+        displayMessage('info', `Video ID detectado: ${videoId}. Preparando descarga...`, false);
 
-        // 2. LLamada a download usando la ruta estándar de Netlify: /.netlify/functions/
-        const downloadResp = await fetch("/.netlify/functions/download", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ videoId }),
-        });
+        // 2. CREAR URL DE DESCARGA CON PROXY
+        // Apuntamos a la función download.js y pasamos el videoId como parámetro GET
+        const downloadProxyUrl = `/.netlify/functions/download?videoId=${videoId}`;
 
-        const downloadData = await downloadResp.json();
-        if (!downloadResp.ok) {
-             throw new Error(downloadData.error || `Error en el servicio de descarga: HTTP ${downloadResp.status}`);
-        }
-        
-        if (downloadData.download_url) {
+
+        if (videoId) {
          result.innerHTML = `
             <p class="text-success fw-bold">✅ ¡Video listo para descargar!</p>
             <a 
-              href="${downloadData.download_url}" 
+              href="${downloadProxyUrl}" 
               class="btn btn-success btn-lg download-btn mt-3" 
-              target="_blank" 
-             download="tiktok_video.mp4" 
+               target="_self" 
               rel="noopener noreferrer"
             >
               <i class="fas fa-download me-2"></i> Descargar video
             </a>
           `;
         } else {
-          displayMessage('danger', downloadData.error || "No se pudo obtener el video.", true);
+          displayMessage('danger', "No se pudo obtener el video.", true);
         }
       } catch (error) {
         console.error("Error general:", error);
