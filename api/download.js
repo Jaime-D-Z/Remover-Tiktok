@@ -1,15 +1,28 @@
-const express = require("express");
-const serverless = require("serverless-http");
 const axios = require("axios");
 
-const app = express();
-app.use(express.json());
+/**
+ * Handler principal para la función de Netlify.
+ * Netlify mapea api/download.js a la ruta /.netlify/functions/download
+ */
+exports.handler = async (event) => {
+  // 1. Verificar que la solicitud sea POST
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Método no permitido. Use POST." }),
+    };
+  }
 
-app.post("/", async (req, res) => {
   try {
-    const { videoId, url } = req.body;
-    if (!videoId && !url)
-      return res.status(400).json({ error: "Falta videoId o url" });
+    // El cuerpo de la solicitud se recibe como una cadena JSON en Netlify/Lambda.
+    const { videoId, url } = JSON.parse(event.body);
+
+    if (!videoId && !url) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Falta videoId o url" }),
+      };
+    }
 
     const videoUrl = url || `https://www.tiktok.com/@user/video/${videoId}`;
     const api = `https://www.tikwm.com/api/?url=${encodeURIComponent(
@@ -23,15 +36,23 @@ app.post("/", async (req, res) => {
     const download_url =
       r.data?.data?.play || r.data?.data?.play_addr || r.data?.data?.wmplay;
 
-    if (!download_url)
-      return res
-        .status(404)
-        .json({ error: "No se encontró la URL del video." });
+    if (!download_url) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "No se encontró la URL del video." }),
+      };
+    }
 
-    res.json({ download_url });
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ download_url }),
+    };
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: err.message }),
+    };
   }
-});
-
-module.exports.handler = serverless(app);
+};

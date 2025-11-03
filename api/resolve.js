@@ -7,9 +7,8 @@ const axios = require("axios");
  */
 async function getFinalUrl(url) {
   // Usamos axios.get para manejar redirecciones y obtener el HTML
-  const resp = await axios.get(url, { maxRedirects: 10, timeout: 10000 });
+  const resp = await axios.get(url, { maxRedirects: 10, timeout: 10000 }); // La URL final está en la propiedad request.res.responseUrl después de todas las redirecciones.
 
-  // La URL final está en la propiedad request.res.responseUrl después de todas las redirecciones.
   const final = resp.request?.res?.responseUrl || url;
 
   return { html: resp.data, finalUrl: final };
@@ -32,23 +31,28 @@ function extractVideoId(finalUrl, html) {
 }
 
 /**
- * Handler principal para la función Serverless de Vercel.
- * Vercel mapea api/resolve.js a la ruta /api/resolve
+ * Handler principal para la función de Netlify.
+ * Netlify mapea api/resolve.js a la ruta /.netlify/functions/resolve
  */
-module.exports = async (req, res) => {
+exports.handler = async (event) => {
   // 1. Verificar que la solicitud sea POST
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Método no permitido. Use POST." });
-    return;
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Método no permitido. Use POST." }),
+    };
   }
 
   try {
-    // El cuerpo de la solicitud (req.body) se parsea automáticamente en Vercel.
-    const { url } = req.body;
+    // El cuerpo de la solicitud se recibe como una cadena JSON en Netlify/Lambda.
+    const { url } = JSON.parse(event.body);
 
     if (!url) {
       console.error("Falta el campo url en el cuerpo de la solicitud.");
-      return res.status(400).json({ error: "Falta el campo url" });
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Falta el campo url" }),
+      };
     }
 
     const { html, finalUrl } = await getFinalUrl(url);
@@ -56,17 +60,26 @@ module.exports = async (req, res) => {
 
     if (!videoId) {
       console.error(`No se pudo extraer videoId de: ${finalUrl}`);
-      return res.status(404).json({ error: "No se pudo obtener el videoId" });
-    }
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "No se pudo obtener el videoId" }),
+      };
+    } // Envía la respuesta en formato JSON
 
-    // Configura el Content-Type explícitamente y envía la respuesta
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).json({ finalUrl, videoId });
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ finalUrl, videoId }),
+    };
   } catch (err) {
     console.error("Error al procesar la solicitud:", err.message);
-    res.setHeader("Content-Type", "application/json");
-    res
-      .status(500)
-      .json({ error: "Error interno del servidor", details: err.message });
+    return {
+      statusCode: 500,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        error: "Error interno del servidor",
+        details: err.message,
+      }),
+    };
   }
 };
