@@ -65,102 +65,103 @@
   </footer>
 
   <script>
-    const btn = document.getElementById("downloadBtn");
-    const result = document.getElementById("result");
-    const urlInput = document.getElementById("tiktokUrl");
-    const darkModeToggle = document.getElementById("darkModeToggle");
-    const body = document.body;
-    
-    // --- LÓGICA DE DARK MODE ---
-    // NOTA: Las clases 'dark-mode' deben estar definidas en style.css.
-    if (localStorage.getItem("darkMode") === "enabled") {
-      body.classList.add("dark-mode");
-      darkModeToggle.checked = true;
-    }
+   const btn = document.getElementById("downloadBtn");
+const result = document.getElementById("result");
+const urlInput = document.getElementById("tiktokUrl");
+const darkModeToggle = document.getElementById("darkModeToggle");
+const body = document.body;
 
-    darkModeToggle.addEventListener("change", () => {
-      if (darkModeToggle.checked) {
-        body.classList.add("dark-mode");
-        localStorage.setItem("darkMode", "enabled");
-      } else {
-        body.classList.remove("dark-mode");
-        localStorage.setItem("darkMode", "disabled");
-      }
-    });
+// --- LÓGICA DE DARK MODE (Sin localStorage) ---
+// Usamos una variable en memoria para mantener el estado durante la sesión
+let darkModeEnabled = false;
 
-    // Función auxiliar para mostrar mensajes de error/info
-    function displayMessage(type, message, isError = false) {
-        const color = isError ? 'text-danger' : (type === 'info' ? 'text-info' : 'text-success');
-        const icon = isError ? '❌' : (type === 'info' ? '⏳' : '✅');
-        result.innerHTML = `<p class="${color} fw-bold">${icon} ${message}</p>`;
-        // Cambiar el color de fondo de la caja de resultados
-        result.classList.remove('bg-white', 'bg-dark');
-        result.classList.add(body.classList.contains('dark-mode') ? 'bg-dark' : 'bg-white');
-    }
+// Aplicar dark mode si está habilitado
+if (darkModeEnabled) {
+  body.classList.add("dark-mode");
+  darkModeToggle.checked = true;
+}
 
-    // --- LÓGICA PRINCIPAL DE DESCARGA (Ahora usa Proxy) ---
-    btn.addEventListener("click", async () => {
-      const url = urlInput.value.trim();
-      
-      if (!url) {
-        displayMessage('warning', 'Por favor, ingresa un enlace de TikTok.', true);
-        return;
-      }
-      
-      // Deshabilitar botón y mostrar carga
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Procesando...';
-      displayMessage('info', 'Resolviendo enlace...', false);
+darkModeToggle.addEventListener("change", () => {
+  if (darkModeToggle.checked) {
+    body.classList.add("dark-mode");
+    darkModeEnabled = true;
+  } else {
+    body.classList.remove("dark-mode");
+    darkModeEnabled = false;
+  }
+});
 
-      try {
-        // 1. LLamada a resolve (POST)
-        const resolveResp = await fetch("/.netlify/functions/resolve", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
-        });
+// Función auxiliar para mostrar mensajes de error/info
+function displayMessage(type, message, isError = false) {
+    const color = isError ? 'text-danger' : (type === 'info' ? 'text-info' : 'text-success');
+    const icon = isError ? '❌' : (type === 'info' ? '⏳' : '✅');
+    result.innerHTML = `<p class="${color} fw-bold">${icon} ${message}</p>`;
+    // Cambiar el color de fondo de la caja de resultados
+    result.classList.remove('bg-white', 'bg-dark');
+    result.classList.add(body.classList.contains('dark-mode') ? 'bg-dark' : 'bg-white');
+}
 
-        if (resolveResp.status === 404) {
-            throw new Error("HTTP 404: No se encontró la función 'resolve'. Revisa la configuración de la ruta de funciones en Netlify.");
-        }
+// --- LÓGICA PRINCIPAL DE DESCARGA (Ahora usa Proxy) ---
+btn.addEventListener("click", async () => {
+  const url = urlInput.value.trim();
+  
+  if (!url) {
+    displayMessage('warning', 'Por favor, ingresa un enlace de TikTok.', true);
+    return;
+  }
+  
+  // Deshabilitar botón y mostrar carga
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Procesando...';
+  displayMessage('info', 'Resolviendo enlace...', false);
 
-        const resolveData = await resolveResp.json();
-        if (!resolveResp.ok) {
-             throw new Error(resolveData.error || `Error en el servicio de resolución: HTTP ${resolveResp.status}`);
-        }
+  try {
+    // 1. LLamada a resolve (POST)
+    const resolveResp = await fetch("/.netlify/functions/resolve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
 
-        const { videoId } = resolveData;
-        displayMessage('info', `Video ID detectado: ${videoId}. Preparando descarga...`, false);
+    if (resolveResp.status === 404) {
+        throw new Error("HTTP 404: No se encontró la función 'resolve'. Revisa la configuración de la ruta de funciones en Netlify.");
+    }
 
-        // 2. CREAR URL DE DESCARGA CON PROXY
-        // Apuntamos a la función download.js y pasamos el videoId como parámetro GET
-        const downloadProxyUrl = `/.netlify/functions/download?videoId=${videoId}`;
+    const resolveData = await resolveResp.json();
+    if (!resolveResp.ok) {
+         throw new Error(resolveData.error || `Error en el servicio de resolución: HTTP ${resolveResp.status}`);
+    }
 
+    const { videoId } = resolveData;
+    displayMessage('info', `Video ID detectado: ${videoId}. Preparando descarga...`, false);
 
-        if (videoId) {
-         result.innerHTML = `
-            <p class="text-success fw-bold">✅ ¡Video listo para descargar!</p>
-            <a 
-              href="${downloadProxyUrl}" 
-              class="btn btn-success btn-lg download-btn mt-3" 
-               target="_self" 
-              rel="noopener noreferrer"
-            >
-              <i class="fas fa-download me-2"></i> Descargar video
-            </a>
-          `;
-        } else {
-          displayMessage('danger', "No se pudo obtener el video.", true);
-        }
-      } catch (error) {
-        console.error("Error general:", error);
-        displayMessage('danger', `Ocurrió un error: ${error.message}.`, true);
-      } finally {
-        // Restaurar botón
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-magic me-2"></i> Obtener Video';
-      }
-    });
+    // 2. CREAR URL DE DESCARGA CON PROXY
+    const downloadProxyUrl = `/.netlify/functions/download?videoId=${videoId}`;
+
+    if (videoId) {
+     result.innerHTML = `
+        <p class="text-success fw-bold">✅ ¡Video listo para descargar!</p>
+        <a 
+          href="${downloadProxyUrl}" 
+          class="btn btn-success btn-lg download-btn mt-3" 
+           target="_self" 
+          rel="noopener noreferrer"
+        >
+          <i class="fas fa-download me-2"></i> Descargar video
+        </a>
+      `;
+    } else {
+      displayMessage('danger', "No se pudo obtener el video.", true);
+    }
+  } catch (error) {
+    console.error("Error general:", error);
+    displayMessage('danger', `Ocurrió un error: ${error.message}.`, true);
+  } finally {
+    // Restaurar botón
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-magic me-2"></i> Obtener Video';
+  }
+});
   </script>
 </body>
 </html>
